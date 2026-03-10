@@ -7,10 +7,10 @@
 <style>
 
 body{
-font-family:Arial;
+font-family: Arial;
+background:#f4f4f4;
 margin:0;
 padding:15px;
-background:#f5f5f5;
 }
 
 .header{
@@ -19,11 +19,15 @@ margin-bottom:20px;
 }
 
 .header img{
-width:250px;
-margin-bottom:10px;
+width:120px;
 }
 
-.search{
+h1{
+margin:5px;
+color:#333;
+}
+
+.search-box{
 margin-bottom:15px;
 }
 
@@ -35,14 +39,14 @@ border-radius:6px;
 border:1px solid #ccc;
 }
 
-.filters{
+.filter-bar{
 display:flex;
 flex-wrap:wrap;
 gap:6px;
 margin-bottom:20px;
 }
 
-.filters button{
+.filter-btn{
 padding:6px 10px;
 border:none;
 background:#e0e0e0;
@@ -51,12 +55,12 @@ cursor:pointer;
 font-size:13px;
 }
 
-.filters button:hover{
+.filter-btn:hover{
 background:#c62828;
 color:white;
 }
 
-.products{
+.product-container{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
 gap:15px;
@@ -72,27 +76,29 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 .model{
 font-weight:bold;
 font-size:16px;
+margin-bottom:6px;
 }
 
 .category{
 font-size:12px;
-color:#777;
-margin-bottom:6px;
+color:#888;
+margin-bottom:8px;
 }
 
 .price{
 font-size:14px;
+margin-bottom:4px;
 }
 
 .dp{
-color:#d32f2f;
+color:#c62828;
 font-weight:bold;
 }
 
 .desc{
 font-size:13px;
-margin-top:6px;
 color:#444;
+margin-top:8px;
 }
 
 </style>
@@ -101,64 +107,63 @@ color:#444;
 <body>
 
 <div class="header">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/LG_symbol.svg/512px-LG_symbol.svg.png">
+<h1>LG Model Price List</h1>
+</div>
 
-<img src="https://drive.google.com/uc?export=view&id=1o4Qscq-Vo2CsQNnn7eJLclze50bz2M9A">
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Search model...">
+</div>
 
-<h2>LG Model Price List</h2>
+<div class="filter-bar">
+
+<button class="filter-btn" onclick="filterCategory('ALL')">ALL</button>
+<button class="filter-btn" onclick="filterCategory('AUDIO')">AUDIO</button>
+<button class="filter-btn" onclick="filterCategory('DC')">DC</button>
+<button class="filter-btn" onclick="filterCategory('FAN & APR')">FAN & APR</button>
+<button class="filter-btn" onclick="filterCategory('FL-WM & DWASH')">FL-WM & DWASH</button>
+<button class="filter-btn" onclick="filterCategory('FPD')">FPD</button>
+<button class="filter-btn" onclick="filterCategory('French Door')">French Door</button>
+<button class="filter-btn" onclick="filterCategory('MWO')">MWO</button>
+<button class="filter-btn" onclick="filterCategory('RAC')">RAC</button>
+<button class="filter-btn" onclick="filterCategory('SA-WM')">SA-WM</button>
+<button class="filter-btn" onclick="filterCategory('SIDE BY SID')">SIDE BY SID</button>
+<button class="filter-btn" onclick="filterCategory('TF-MODELS')">TF-MODELS</button>
+<button class="filter-btn" onclick="filterCategory('TL-WM')">TL-WM</button>
+<button class="filter-btn" onclick="filterCategory('WATER Purifier')">WATER Purifier</button>
 
 </div>
 
-<div class="search">
-<input type="text" id="searchInput" placeholder="Search Model...">
-</div>
-
-<div class="filters">
-
-<button onclick="setCategory('ALL')">ALL</button>
-<button onclick="setCategory('AUDIO')">AUDIO</button>
-<button onclick="setCategory('DC')">DC</button>
-<button onclick="setCategory('FAN & APR')">FAN & APR</button>
-<button onclick="setCategory('FL-WM & DWASH')">FL-WM & DWASH</button>
-<button onclick="setCategory('FPD')">FPD</button>
-<button onclick="setCategory('French Door')">French Door</button>
-<button onclick="setCategory('MWO')">MWO</button>
-<button onclick="setCategory('RAC')">RAC</button>
-<button onclick="setCategory('SA-WM')">SA-WM</button>
-<button onclick="setCategory('SIDE BY SID')">SIDE BY SID</button>
-<button onclick="setCategory('TF-MODELS')">TF-MODELS</button>
-<button onclick="setCategory('TL-WM')">TL-WM</button>
-<button onclick="setCategory('WATER Purifier')">WATER Purifier</button>
-
-</div>
-
-<div class="products" id="productList"></div>
+<div class="product-container" id="productList"></div>
 
 <script>
 
-let sheetID="YOUR_SHEET_ID";
-let sheetName="Sheet1";
+let sheetID = "1BumCKJIu699JbullfevdlkQhdVsz09Ehc-8PK05lJGM";
+let sheetName = "Sheet1";
 
-let url=`https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+let url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
 
-let allData=[];
-let currentCategory="ALL";
+let products = [];
+let currentCategory = "ALL";
 
 fetch(url)
-.then(res=>res.json())
-.then(data=>{
-allData=data;
-showProducts(data);
+.then(res => res.json())
+.then(data => {
+
+products = data;
+displayProducts(products);
+
 });
 
-function showProducts(data){
 
-let html="";
+function displayProducts(list){
 
-data.forEach(item=>{
+let html = "";
 
-html+=`
+list.forEach(item => {
 
-<div class="card">
+html += `
+<div class="card" data-category="${item.Category}">
 
 <div class="model">${item.MODEL}</div>
 
@@ -175,41 +180,43 @@ html+=`
 <div class="desc">${item.Description}</div>
 
 </div>
-
 `;
 
 });
 
-document.getElementById("productList").innerHTML=html;
+document.getElementById("productList").innerHTML = html;
 
 }
 
-function setCategory(cat){
 
-currentCategory=cat;
+function filterCategory(category){
+
+currentCategory = category;
 applyFilters();
 
 }
 
-document.getElementById("searchInput").addEventListener("keyup",applyFilters);
+
+document.getElementById("searchInput").addEventListener("keyup", applyFilters);
+
 
 function applyFilters(){
 
-let search=document.getElementById("searchInput").value.toLowerCase();
+let search = document.getElementById("searchInput").value.toLowerCase();
 
-let filtered=allData.filter(item=>{
+let filtered = products.filter(item => {
 
-let categoryMatch=currentCategory==="ALL" || item.Category===currentCategory;
+let matchCategory = currentCategory === "ALL" || item.Category === currentCategory;
 
-let searchMatch=
+let matchSearch =
 item.MODEL.toLowerCase().includes(search) ||
 item.Description.toLowerCase().includes(search);
 
-return categoryMatch && searchMatch;
+return matchCategory && matchSearch;
 
 });
 
-showProducts(filtered);
+displayProducts(filtered);
 
 }
 
